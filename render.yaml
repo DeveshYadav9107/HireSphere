@@ -4,7 +4,7 @@ services:
     name: hiresphere
     env: node
     plan: free
-    buildCommand: "npm install && npm run build"
+    buildCommand: "npm run render-build"
     startCommand: "npm start"
     envVars:
       - key: NODE_ENV
