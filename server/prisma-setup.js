@@ -2,7 +2,7 @@ const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-console.log('🚀 Starting HireSphere Database Setup...');
+console.log('🚀 Starting HireSphere Full-Stack Setup...');
 
 // 1. Align Prisma schema datasource provider
 const schemaPath = path.join(__dirname, 'prisma/schema.prisma');
@@ -70,4 +70,28 @@ if (fs.existsSync(seedPath)) {
   }
 }
 
-console.log('🎉 HireSphere Database Setup Finished Successfully!');
+// 6. Build Client Frontend if ../client exists
+const clientDir = path.resolve(__dirname, '../client');
+if (fs.existsSync(clientDir)) {
+  console.log('📦 Building frontend client...');
+  try {
+    execSync('npm install --include=dev && npm run build', {
+      stdio: 'inherit',
+      cwd: clientDir,
+      env: process.env,
+    });
+    console.log('✅ Frontend client built successfully into client/dist!');
+
+    // Mirror to server/public so it's always accessible from server root
+    const clientDist = path.join(clientDir, 'dist');
+    const serverPublic = path.join(__dirname, 'public');
+    if (fs.existsSync(clientDist)) {
+      fs.cpSync(clientDist, serverPublic, { recursive: true });
+      console.log('✅ Frontend build mirrored into server/public!');
+    }
+  } catch (err) {
+    console.warn('⚠️ Notice during client build:', err.message);
+  }
+}
+
+console.log('🎉 HireSphere Full-Stack Setup Finished Successfully!');

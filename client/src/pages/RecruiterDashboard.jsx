@@ -19,7 +19,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { apiRequest } from '../utils/api';
+import { apiRequest, API_BASE } from '../utils/api';
 
 export default function RecruiterDashboard() {
   const { user } = useAuth();
@@ -222,7 +222,7 @@ export default function RecruiterDashboard() {
   const handleDownloadResume = async (resumeId, candidateName) => {
     try {
       const token = localStorage.getItem('hiresphere_token');
-      const response = await fetch(`/api/resumes/download/${resumeId}`, {
+      const response = await fetch(`${API_BASE}/resumes/download/${resumeId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error('Download failed');

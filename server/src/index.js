@@ -72,9 +72,18 @@ app.use('/api/*', (req, res) => {
   res.status(404).json({ message: `API route not found: ${req.originalUrl}` });
 });
 
-// Production: Serve Frontend Static Assets if client/dist exists (Monolithic / Single-Service Deployment)
-const clientDistPath = path.resolve(__dirname, '../../client/dist');
-if (fs.existsSync(clientDistPath)) {
+// Check possible dist paths for client build
+const possibleDistPaths = [
+  path.resolve(__dirname, '../public'),
+  path.resolve(process.cwd(), 'public'),
+  path.resolve(__dirname, '../../client/dist'),
+  path.resolve(__dirname, '../client/dist'),
+  path.resolve(process.cwd(), '../client/dist'),
+  path.resolve(process.cwd(), 'client/dist'),
+];
+const clientDistPath = possibleDistPaths.find((p) => fs.existsSync(p));
+
+if (clientDistPath) {
   console.log(`📦 Serving client production build from: ${clientDistPath}`);
   app.use(express.static(clientDistPath));
 
@@ -84,6 +93,23 @@ if (fs.existsSync(clientDistPath)) {
       return next();
     }
     res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+} else {
+  console.log('ℹ️ client/dist not detected. Running in pure API backend mode.');
+  app.all('*', (req, res) => {
+    if (req.originalUrl.startsWith('/api')) {
+      return res.status(404).json({ message: `API route not found: ${req.originalUrl}` });
+    }
+    res.json({
+      status: 'ok',
+      service: 'HireSphere Backend API Server',
+      message: 'Backend API is running live. Frontend build is loading or hosted separately.',
+      endpoints: {
+        health: '/api/health',
+        jobs: '/api/jobs',
+        companies: '/api/companies',
+      },
+    });
   });
 }
 
