@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  hiresphere:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hiresphere_app
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DATABASE_URL=file:./prisma/dev.db
+      - JWT_SECRET=hiresphere_docker_secret_key_2026_xyz
+    volumes:
+      - hiresphere_data:/app/server/prisma
+      - hiresphere_uploads:/app/server/uploads
+    restart: unless-stopped
+
+volumes:
+  hiresphere_data:
+  hiresphere_uploads:

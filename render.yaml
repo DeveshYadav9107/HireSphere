@@ -1,0 +1,17 @@
+# Render.com Blueprint for HireSphere Full-Stack Deployment
+services:
+  - type: web
+    name: hiresphere
+    env: node
+    plan: free
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm start"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        value: "file:./prisma/dev.db"

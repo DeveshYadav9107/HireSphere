@@ -1,99 +1,143 @@
-# HireSphere - Professional Job Portal (Naukri-Inspired Architecture)
+# HireSphere - Complete Full-Stack Job Portal (Naukri-Inspired)
 
-**HireSphere** is a complete, full-stack recruitment platform and career discovery portal built using [Naukri.com](https://www.naukri.com/) as the design and user flow reference. It features a modern, distinct brand identity with a centralized design system:
-- **Primary Color:** Deep Indigo (`#4338CA`)
-- **Secondary Color:** Dark Navy (`#172554`)
-- **Accent Color:** Teal (`#0D9488`)
-- **Page Background:** Light Neutral (`#F8FAFC`)
-- **Card Background:** White (`#FFFFFF`)
-- **Typography:** Inter (Google Fonts)
+**HireSphere** is a complete, production-ready full-stack recruitment platform and career discovery portal modeled after **[Naukri.com](https://www.naukri.com/)** with modern aesthetics and a centralized design system.
 
 ---
 
-## Architecture Overview
+## 📁 Project Structure
 
 ```
 naukri/
-├── package.json               # Root scripts orchestrating client & server
-├── README.md                  # Project documentation
-├── naukri/                    # Frontend (Vite + React 19 + Tailwind CSS)
-│   ├── src/
-│   │   ├── components/        # Navbar, Footer, JobCard, SearchBanner, ApplyModal
-│   │   ├── context/           # AuthContext (JWT session management)
-│   │   ├── pages/             # Home, Jobs, JobDetail, Companies, Dashboards, Auth
-│   │   ├── utils/             # api.js fetch client with Bearer auth
-│   │   ├── index.css          # Centralized brand tokens & utilities
-│   │   └── App.jsx            # React Router DOM configuration
-│   └── vite.config.js         # Tailwind plugin and /api proxy to port 5000
-└── server/                    # Backend (Node.js + Express + Prisma ORM)
+├── package.json              # Root orchestration scripts (dev, build, start, seed)
+├── Dockerfile                # Multi-stage production container build
+├── docker-compose.yml        # 1-command containerized local/cloud run
+├── render.yaml               # 1-click blueprint for Render.com deployment
+├── README.md                 # Complete documentation & deployment guide
+├── .env.example              # Root environment template
+│
+├── client/                   # Frontend SPA (React 19, Vite, Tailwind CSS, React Router DOM)
+│   ├── index.html            # Brand metadata, SEO tags, Inter Google fonts
+│   ├── package.json          # Frontend dependencies
+│   ├── vercel.json           # Vercel SPA routing configuration
+│   ├── vite.config.js        # Tailwind plugin and /api development proxy
+│   ├── .env.example          # Client environment template
+│   └── src/
+│       ├── components/       # Navbar, Footer, JobCard, SearchBanner, ApplyModal
+│       ├── context/          # AuthContext (JWT auth, profile state, session restore)
+│       ├── pages/            # Home, Jobs, JobDetail, Companies, Dashboards, Auth
+│       ├── utils/            # api.js API fetch client
+│       └── index.css         # Centralized brand tokens & custom utilities
+│
+└── server/                   # Backend API (Express.js, Prisma ORM, JWT, Multer)
+    ├── package.json          # Backend dependencies & Prisma scripts
+    ├── .env                  # Local server environment config
+    ├── .env.example          # Server environment template with PostgreSQL instructions
     ├── prisma/
-    │   ├── schema.prisma      # Relational schema (Users, Jobs, Applications, etc.)
-    │   └── seed.js            # Comprehensive demo data seed script
-    ├── uploads/               # Secure resume storage (max 5MB, PDF/DOCX)
+    │   ├── schema.prisma     # Relational database models
+    │   └── seed.js           # Comprehensive sample dataset seed script
+    ├── uploads/              # Protected storage for candidate CV uploads
     └── src/
-        ├── middleware/        # JWT requireAuth, requireRole, optionalAuth
-        ├── routes/            # auth, jobs, applications, recruiter, admin, etc.
-        └── index.js           # Express application entry point
+        ├── config/           # Database PrismaClient singleton
+        ├── middleware/       # JWT auth & role-based route guards
+        ├── routes/           # auth, jobs, applications, recruiter, resumes, admin, etc.
+        └── index.js          # Main Express server (serves client/dist in production)
 ```
 
 ---
 
-## Ready-to-Use Demo Accounts
+## ⚡ Quick Start (Local Development)
 
-The database comes pre-seeded with realistic data across Indian and global tech hubs (Bengaluru, Hyderabad, Pune, Gurugram, Remote).
-
-| Role | Email | Password | Pre-loaded Data |
-|---|---|---|---|
-| **Candidate** | `candidate@hiresphere.com` | `Password123!` | Rahul Sharma (Senior Full Stack Dev, 85% profile score, uploaded CV, 2 applications) |
-| **Recruiter (Lead)** | `recruiter@hiresphere.com` | `Password123!` | Priya Nair (Razorpay Talent Acquisition, multiple live tech jobs & applicants) |
-| **Recruiter (Tech)** | `recruiter2@hiresphere.com` | `Password123!` | Vikram Mehta (Enterprise Recruiter at Microsoft India) |
-| **Administrator** | `admin@hiresphere.com` | `Password123!` | Platform Governance & Compliance Lead |
-
-*Note: The login page includes 1-click quick login buttons to switch between Candidate, Recruiter, and Admin instantly without typing.*
-
----
-
-## Getting Started
-
-### 1. Prerequisites
-- **Node.js** v18+ (tested on Node v24.15.0)
-- **npm** v9+
-
-### 2. Run Locally (Full-Stack Dev Server)
-From the workspace root directory:
+### 1. Install & Run Dev Server
+From the workspace root (`c:\Users\RAO SHAB\Desktop\naukri`):
 ```bash
+# Run both Backend (Port 5000) and Frontend (Port 5173) concurrently:
 npm run dev
 ```
-This automatically launches:
-1. Express API Backend on `http://localhost:5000`
-2. Vite Frontend on `http://localhost:5173` (or `http://localhost:5174`)
 
-### 3. Re-seeding the Database
-To reset and re-populate the sample jobs, applications, and companies:
+- **Frontend (Dev):** `http://localhost:5173`
+- **Backend API:** `http://localhost:5000/api`
+- **Health Check:** `http://localhost:5000/api/health`
+
+### 2. Database Reset & Seeding
+To re-seed sample jobs, verified companies, candidates, and applications:
 ```bash
 npm run seed
 ```
 
 ---
 
-## Database Configuration (SQLite & PostgreSQL)
+## 🚀 Production Build & Deployment
 
-By default, HireSphere runs out-of-the-box on **SQLite** (`server/prisma/dev.db`), requiring **zero local database daemons or Docker setup**.
+HireSphere is designed for flexible deployment:
+1. **Unified Monolithic Deployment** (Recommended: Render, Railway, DigitalOcean, Heroku, Docker) - Client and server run together on a single port.
+2. **Decoupled Deployment** - Frontend on Vercel/Netlify and Backend on Render/Railway.
 
-### Switching to PostgreSQL
-To use PostgreSQL (e.g. Supabase, Neon, or local Postgres):
-1. In `server/prisma/schema.prisma`, update the datasource provider:
+### Option 1: Unified Full-Stack Deployment (Render / Railway / VPS)
+
+The Express server automatically detects and serves the built frontend (`client/dist`) and handles client-side SPA routing for all routes.
+
+```bash
+# 1. Build frontend:
+npm run build
+
+# 2. Start production server:
+npm start
+```
+The entire application (UI + APIs) will be accessible on `http://localhost:5000`!
+
+#### Deploying on Render.com:
+- Connect your GitHub repository.
+- Select **Web Service**.
+- Build Command: `npm install && npm run build`
+- Start Command: `npm start`
+- Add Environment Variables:
+  - `NODE_ENV`: `production`
+  - `JWT_SECRET`: (Generate a secure random string)
+  - `DATABASE_URL`: `file:./prisma/dev.db` (or PostgreSQL URL)
+
+#### Deploying with Docker:
+```bash
+# Build and run with Docker Compose:
+docker compose up -d --build
+```
+Access the application at `http://localhost:5000`.
+
+---
+
+### Option 2: Decoupled Deployment (Vercel Frontend + Render Backend)
+
+1. **Backend (on Render/Railway):**
+   - Root Directory: `server`
+   - Build Command: `npm install && npx prisma generate`
+   - Start Command: `npm start`
+   - Set `CLIENT_URL=https://your-frontend.vercel.app`
+
+2. **Frontend (on Vercel):**
+   - Root Directory: `client`
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+   - Add Environment Variable:
+     - `VITE_API_URL=https://your-backend.onrender.com`
+
+---
+
+## 🗄️ Database Switching: SQLite to PostgreSQL
+
+HireSphere uses **SQLite** by default (`server/prisma/dev.db`) for immediate zero-config execution.
+
+To switch to **PostgreSQL** (e.g., Supabase, Neon, AWS RDS, Render Postgres):
+1. In [`server/prisma/schema.prisma`](file:///c:/Users/RAO%20SHAB/Desktop/naukri/server/prisma/schema.prisma):
    ```prisma
    datasource db {
      provider = "postgresql"
      url      = env("DATABASE_URL")
    }
    ```
-2. In `server/.env`, set your connection string:
+2. In `server/.env`:
    ```env
-   DATABASE_URL="postgresql://username:password@localhost:5432/hiresphere?schema=public"
+   DATABASE_URL="postgresql://user:password@host:5432/hiresphere?sslmode=require"
    ```
-3. Run migrations and seed:
+3. Push schema and seed:
    ```bash
    cd server
    npx prisma db push
@@ -102,53 +146,13 @@ To use PostgreSQL (e.g. Supabase, Neon, or local Postgres):
 
 ---
 
-## Implemented Features
+## 🔑 Pre-Seeded Demo Test Accounts
 
-### 1. Homepage (`/`)
-- Signature 3-field job search banner (Keyword/Title/Company, Experience selector, Location) with real-time autocomplete suggestions.
-- Popular trending search pills (Remote, MNC, Freshers, High CTC).
-- Top hiring companies grid with verified ratings, reviews, and open vacancy counts.
-- Domain category tiles (Engineering, Design, Data Science & GenAI, Cloud/DevOps).
-- Fast-Forward career booster section (Resume Score, Free Job Alerts, Recruiter Access).
-- Full 5-column Naukri-style footer.
+The login page contains **1-click instant login buttons** for all three roles:
 
-### 2. Job Search & Listing (`/jobs`)
-- 2-column layout with responsive filter sidebar:
-  - Work Mode (Remote, Hybrid, On-site)
-  - Experience (Fresher, 1-3, 3-5, 5-8, 8+ Yrs)
-  - Salary in Lakhs Per Annum (3+, 6+, 10+, 15+, 25+, 35+ LPA)
-  - Location (Bengaluru, Hyderabad, Pune, Gurugram, Mumbai, Remote)
-  - Department (Engineering, Design, Product, etc.)
-  - Freshness (Last 24 Hours, 3 Days, 7 Days, 14 Days)
-- Live search query summary and removable filter badges.
-- Sorting by Relevance, Newest, Salary (High to Low / Low to High).
-- Job Cards with company rating, salary in LPA, skills tags, bookmark button, and apply link.
-- Pagination controls.
-
-### 3. Job Details Page (`/jobs/:id`)
-- Comprehensive overview with salary, location, experience, and openings.
-- Rich job description, candidate requirements, and company perks.
-- Interactive **Apply Now** modal with resume selector, notice period, and CTC inputs.
-- Bookmark save/unsave toggle and shareable link button.
-- About Company snapshot with website link.
-- Similar opportunities sidebar.
-
-### 4. Candidate Dashboard (`/candidate/dashboard`)
-- Dynamic Profile Strength bar (e.g. 85%) with guidance to reach 100%.
-- **My Profile:** Edit headline, summary, location, compensation expectations, and interactive skill tags.
-- **Resume Manager:** Upload PDF/DOCX resumes (up to 5MB), download resume via authorized endpoint, or delete resume.
-- **Applied Jobs:** Real-time application status tracker (`APPLIED`, `UNDER_REVIEW`, `SHORTLISTED`, `INTERVIEW`, `REJECTED`, `SELECTED`).
-- **Saved Jobs:** Bookmarked jobs with 1-click apply.
-- **Job Alerts:** Create and toggle search notification alerts.
-
-### 5. Recruiter Dashboard (`/recruiter/dashboard`)
-- Metrics: Active Jobs, Total Applicants, Shortlisted Candidates, Total Views.
-- **Post a Job:** Full form supporting skills tags, salary in LPA, work arrangement, experience limits.
-- **Manage Jobs:** Table of active listings, status toggle (Active/Closed), applicant counts, and delete action.
-- **Candidate Applicants:** Filter by job and status, review applicant profile, download CV, and update application status (automatically creates candidate notifications).
-
-### 6. Admin Portal (`/admin`)
-- Platform-wide statistics (Users, Jobs, Applications, Companies).
-- User Management: Search users, toggle account suspension, and update roles.
-- Job Moderation: Inspect and remove inappropriate listings.
-- Administrative Audit Logs recording governance actions.
+| Role | Email | Password | Pre-Loaded Profile |
+|---|---|---|---|
+| **Candidate** | `candidate@hiresphere.com` | `Password123!` | Rahul Sharma (Senior Full Stack Dev, CV uploaded, 2 applied jobs) |
+| **Recruiter (Lead)** | `recruiter@hiresphere.com` | `Password123!` | Priya Nair (Razorpay Talent Acquisition, live tech jobs & applicants) |
+| **Recruiter (Tech)** | `recruiter2@hiresphere.com` | `Password123!` | Vikram Mehta (Enterprise Recruiter at Microsoft India) |
+| **Administrator** | `admin@hiresphere.com` | `Password123!` | System Governance & Compliance Administrator |
