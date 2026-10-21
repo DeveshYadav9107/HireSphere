@@ -6,27 +6,28 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "render-build": "vite build",
+    "render-build": "npm install --include=dev && vite build",
+    "start": "vite preview --port $PORT --host 0.0.0.0",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.2",
     "lucide-react": "^1.60.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-router-dom": "^7.18.4"
+    "react-router-dom": "^7.18.4",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.2",
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
-    "globals": "^17.13.0",
-    "tailwindcss": "^4.3.3",
-    "vite": "^8.3.4"
+    "globals": "^17.13.0"
   }
 }
