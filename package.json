@@ -1,0 +1,16 @@
+{
+  "name": "hiresphere-portal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HireSphere - Complete Naukri-Inspired Job Portal Full Stack Application",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "npm --prefix server dev",
+    "client": "npm --prefix naukri dev",
+    "seed": "npm --prefix server seed",
+    "build": "npm --prefix naukri build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.5"
+  }
+}

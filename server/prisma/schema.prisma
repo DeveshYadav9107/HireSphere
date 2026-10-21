@@ -1,0 +1,253 @@
+// Prisma schema for HireSphere (Naukri-inspired Job Portal)
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ----------------------------------------------------
+// Core User & Auth
+// ----------------------------------------------------
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  phone         String?
+  role          String    @default("CANDIDATE") // CANDIDATE, RECRUITER, ADMIN
+  avatar        String?
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relationships
+  candidateProfile CandidateProfile?
+  recruiterJobs    Job[]             @relation("RecruiterJobs")
+  applications     JobApplication[]  @relation("CandidateApplications")
+  savedJobs        SavedJob[]
+  resumes          Resume[]
+  jobAlerts        JobAlert[]
+  notifications    Notification[]
+  auditLogs        AuditLog[]        @relation("AdminLogs")
+}
+
+// ----------------------------------------------------
+// Candidate Profile & Resume
+// ----------------------------------------------------
+model CandidateProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headline           String?
+  summary            String?
+  location           String?
+  currentSalary      Float?
+  expectedSalary     Float?
+  noticePeriod       String?  // Immediate, 15 Days, 1 Month, 2 Months, 3 Months
+  preferredLocations String?  // comma-separated or JSON
+  preferredRoles     String?  // comma-separated or JSON
+  profileCompletion  Int      @default(30)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  skills      CandidateSkill[]
+  experiences CandidateExperience[]
+  educations  CandidateEducation[]
+}
+
+model CandidateSkill {
+  id                 String           @id @default(cuid())
+  candidateProfileId String
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  name               String
+  yearsOfExp         Float            @default(1.0)
+  proficiency        String           @default("INTERMEDIATE") // BEGINNER, INTERMEDIATE, EXPERT
+}
+
+model CandidateExperience {
+  id                 String           @id @default(cuid())
+  candidateProfileId String
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  company            String
+  role               String
+  startDate          String
+  endDate            String?
+  isCurrent          Boolean          @default(false)
+  location           String?
+  description        String?
+}
+
+model CandidateEducation {
+  id                 String           @id @default(cuid())
+  candidateProfileId String
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  degree             String
+  institution        String
+  fieldOfStudy       String?
+  graduationYear     Int
+  score              String?
+}
+
+model Resume {
+  id           String           @id @default(cuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName     String
+  originalName String
+  filePath     String
+  fileSize     Int
+  mimeType     String
+  isDefault    Boolean          @default(true)
+  uploadedAt   DateTime         @default(now())
+  applications JobApplication[]
+}
+
+// ----------------------------------------------------
+// Company & Recruiter
+// ----------------------------------------------------
+model Company {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  slug         String   @unique
+  logo         String?
+  industry     String   @default("Information Technology")
+  website      String?
+  location     String
+  size         String   @default("500-1,000 Employees") // e.g. 50-200, 1000-5000, 10000+
+  description  String
+  foundedYear  Int?
+  verified     Boolean  @default(true)
+  rating       Float    @default(4.2)
+  reviewsCount Int      @default(120)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  jobs Job[]
+}
+
+// ----------------------------------------------------
+// Jobs
+// ----------------------------------------------------
+model Job {
+  id             String   @id @default(cuid())
+  recruiterId    String
+  recruiter      User     @relation("RecruiterJobs", fields: [recruiterId], references: [id], onDelete: Cascade)
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  title          String
+  slug           String
+  department     String   @default("Software Engineering")
+  workMode       String   @default("Hybrid") // Remote, Hybrid, On-site
+  location       String
+  minExp         Int      @default(0) // years
+  maxExp         Int      @default(5)
+  minSalary      Float?   // in LPA (Lakhs Per Annum) or Annual
+  maxSalary      Float?
+  salaryCurrency String   @default("INR")
+  employmentType String   @default("Full Time") // Full Time, Part Time, Contract, Internship
+  description    String
+  requirements   String?
+  benefits       String?
+  status         String   @default("ACTIVE") // ACTIVE, DRAFT, CLOSED
+  openings       Int      @default(1)
+  viewsCount     Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  skills       JobSkill[]
+  applications JobApplication[]
+  savedBy      SavedJob[]
+}
+
+model JobSkill {
+  id    String @id @default(cuid())
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  skill String
+}
+
+// ----------------------------------------------------
+// Job Applications & Status Tracking
+// ----------------------------------------------------
+model JobApplication {
+  id           String   @id @default(cuid())
+  jobId        String
+  job          Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateId  String
+  candidate    User     @relation("CandidateApplications", fields: [candidateId], references: [id], onDelete: Cascade)
+  resumeId     String?
+  resume       Resume?  @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  coverNote    String?
+  currentCtc   Float?
+  expectedCtc  Float?
+  noticePeriod String?
+  status       String   @default("APPLIED") // APPLIED, UNDER_REVIEW, SHORTLISTED, INTERVIEW, REJECTED, SELECTED
+  appliedAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([jobId, candidateId]) // Prevent accidental duplicate applications
+}
+
+// ----------------------------------------------------
+// Saved Jobs
+// ----------------------------------------------------
+model SavedJob {
+  id          String   @id @default(cuid())
+  candidateId String
+  candidate   User     @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  jobId       String
+  job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  savedAt     DateTime @default(now())
+
+  @@unique([candidateId, jobId])
+}
+
+// ----------------------------------------------------
+// Job Alerts
+// ----------------------------------------------------
+model JobAlert {
+  id          String   @id @default(cuid())
+  candidateId String
+  candidate   User     @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  title       String
+  keywords    String
+  location    String?
+  minSalary   Float?
+  maxExp      Int?
+  frequency   String   @default("DAILY") // DAILY, WEEKLY
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+// ----------------------------------------------------
+// In-App Notifications
+// ----------------------------------------------------
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("INFO") // APPLICATION, STATUS_CHANGE, ALERT, SYSTEM
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+}
+
+// ----------------------------------------------------
+// Admin Audit Logs
+// ----------------------------------------------------
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  admin      User     @relation("AdminLogs", fields: [adminId], references: [id], onDelete: Cascade)
+  action     String   // USER_SUSPENDED, JOB_DELETED, JOB_FEATURED, ROLE_CHANGED
+  targetType String   // USER, JOB, COMPANY
+  targetId   String
+  details    String?
+  createdAt  DateTime @default(now())
+}
